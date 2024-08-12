@@ -1,18 +1,18 @@
-import argparse
-import cv2
+import argparse     #Helps to create a command-line environment
+import cv2          
 import numpy as np
 import math
 import csv
-import gc
+import gc            #use to free up memory space
 import matplotlib.pyplot as plt
 
-def right_left(anglet):
+def right_left(anglet):                          #function to calculate LEFT and RIGHT direction using angles
     if 0 <= anglet <= 90 or 270 <= anglet <= 360:
         return 1, 0
     else:
         return 0, 1
 
-def angle_tanfunction(x, y):
+def angle_tanfunction(x, y):                     #function to calculate the angle using coordinates
     if x > 0 and y >= 0:
         return math.degrees(math.atan(y / x))
     elif x < 0 and y >= 0:
@@ -28,7 +28,7 @@ def angle_tanfunction(x, y):
     return 0
 
 def process_batch(start, end, csv_writer):
-    for i in range(start, end):
+    for i in range(start, end):               #reading each frame from the video
         path = f"C:/Users/vershi/OneDrive/Desktop/slablab/circle_bot/v_20_vacc_0/frame/{i}.jpg"
         img = cv2.imread(path, cv2.IMREAD_COLOR)
 
@@ -40,7 +40,7 @@ def process_batch(start, end, csv_writer):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # Set up the SimpleBlobDetector parameters
-        params = cv2.SimpleBlobDetector_Params()
+        params = cv2.SimpleBlobDetector_Params()    #using blobDetector to detect circle using area parameters
         params.filterByArea = True
         params.minArea = 165
         params.maxArea = 551
@@ -57,7 +57,7 @@ def process_batch(start, end, csv_writer):
         # Draw detected blobs using Matplotlib
        
             # Draw arrow between two points (example using the first two detected circles)
-        if len(detected_circles) >= 2:
+        if len(detected_circles) >= 2:       #keeping in mind the arrow starts from larger circle and goes to smaller circle
             if detected_circles[0][2] > detected_circles[1][2]:
                 start_point = (detected_circles[0][0], detected_circles[0][1])
                 end_point = (detected_circles[1][0], detected_circles[1][1])
@@ -77,12 +77,12 @@ def process_batch(start, end, csv_writer):
             anglet = round(anglet1, 3)
             right, left = right_left(anglet)
 
-            list_row = [center_x * 0.316, center_y * 0.316, anglet, right, left]
+            list_row = [center_x * 0.316, center_y * 0.316, anglet, right, left]  #appending the values in mm in the points csv file
             csv_writer.writerow(list_row)  # Write the data to CSV
 
                 
 
-        del img, gray, detected_circles, keypoints
+        del img, gray, detected_circles, keypoints   #deleting the objects to reduce memory usage and increase efficiency
         gc.collect()
         print("Processed image:", i)
 
